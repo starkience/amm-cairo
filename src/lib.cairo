@@ -15,6 +15,10 @@ const TOKEN_TYPE_B = 2;
 const POOL_UPPER_BOUND = 2 ** 30;
 const ACCOUNT_BALANCE_BOUND = 1073741;  // 2**30 // 1000.
 
+
+
+
+
 // A map from account and token type to the corresponding balance of that account.
 @storage_var
 func account_balance(account_id: felt, token_type: felt) -> (balance: felt) {
