@@ -2,12 +2,16 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IAMM<TContractState> {
-    fn get_account_token_balance(self: @TContractState, account_id: ContractAddress, token_type: u16) -> u128;
+    fn get_account_token_balance(self: @TContractState, account_id: u128, token_type: u16) -> u128;
     fn get_pool_token_balance(self: @TContractState, token_type: u126) -> u128;
     fn swap(ref self: TContractState, token_from: u128, amount_from: u128) -> u128;
+    fn get_opposite_token(self: @TContractState, token_type: u16) -> u16;
+    fn do_swap(ref self: TContractState, account_id: u128, token_from: u128, token_to: u128, amount_from: u128) -> amount_to;
 }
 
-
+const MAX_BALANCE: u256 = 1000000000;
+const TOKEN_TYPE_A: u8 = 1;
+const TOKEN_TYPE_B: u8 = 2;
 
 #[starknet::contract]
 mod AMM {
@@ -37,9 +41,41 @@ mod AMM {
         }
         fn swap(ref self: ContractState, token_from: u128, amount_from: u128) {
             let account_id = get_caller_address();
+            assert_eq!((token_from - TOKEN_TYPE_A) * (token_from - TOKEN_TYPE_B), 0, "token_from must be TOKEN_TYPE_A or TOKEN_TYPE_B");
+            assert!(amount_from < BALANCE_UPPER_BOUND, "amount_from must be less than BALANCE_UPPER_BOUND");
 
-            // add swap function logic here
+            let account_from_balance = get_account_balance_token(account_id, token_from);
+            assert!(amount_from <= account_from_balance, "Not enough funds");
+
+            let amount_to = get_opposite_token(token_from); // assuming token_from is the variable containing the token type to be swapped
+            let amount_to = do_swap(
+                account_id,
+                token_from,
+                token_to,
+                amount_from,
+            );
+            amount_to
         }
+        fn get_opposite_token(self: ContractState, token_type: u16) -> u16 {
+            let token_type = self.token_type.read();
+            if token_type == TOKEN_TYPE_A {
+                return TOKEN_TYPE_B;
+            } else {
+                TOKEN_TYPE_A;
+            }
+        }
+        fn do_swap (ref self:
+            ContractState,
+            account_id: u128,
+            token_from: u128,
+            token_to: u128,
+            amount_from: u128
+            ) -> amount_to {
+                let amm_from_balance = get_pool_token_balance(token_from);
+                let amm_to_balance = get_pool_token_balance(token_to);
+                let amount_to
+            }
+        
     }
 
 
@@ -54,28 +90,9 @@ mod AMM {
     ) {
         let mut current_balance = self.account_balance.read();
         let new_balance = current_balance + amount;
-        let MAX_BALANCE = 1000000000;
         assert!(self.new_balance.read() <= MAX_BALANCE, "New balance exceeds maximum allowed balance");
         self.account_balance.write(account_id, token_type, new_balance);
-
       }
+
     }
-
-    
- }
-
-
-
-
-
-// trait & Impl
-//set_pool_token_balance
-// get_pool balance
-//do_swapget_opposite_token
-
-//external
-//swap ___
-//add_demo_token ___
-//init_pool ___
-
-
+}
