@@ -54,7 +54,7 @@ mod AMM {
                 token_to,
                 amount_from,
             );
-            amount_to
+            return amount_to;
         }
         fn get_opposite_token(self: ContractState, token_type: u16) -> u16 {
             let token_type = self.token_type.read();
