@@ -2,8 +2,9 @@ use starknet::ContractAddress;
 
 #[starknet::interface]
 pub trait IAMM<TContractState> {
-    fn swap(ref self: TContractState,token_from: u128, amount_from: u128) -> u128;
-    fn add_demo_token
+    fn get_account_token_balance(self: @TContractState, account_id: ContractAddress, token_type: u16) -> u128;
+    fn get_pool_token_balance(self: @TContractState, token_type: u126) -> u128;
+    fn swap(ref self: TContractState, token_from: u128, amount_from: u128) -> u128;
 }
 
 
@@ -15,17 +16,29 @@ mod AMM {
     #[storage]
     struct Storage {
         account_balance: LegacyMap::<balance<ContractAddress, token_type>,
+        pool_balance: LegacyMap::<token_type, balance>,
         balance: u128,
-        token_type: u16,
-        pool_balance: LegacyMap::<token_type, balance>
+        token_type: u16
     }
 
     #[abi(embed_v0)]
     impl AMM of super::IAMM<ContractState> {
         // define account balance as felt252
+        // view get_account_token_balance
+        // view set_pool_token_balance
+
+        fn get_account_token_balance(self: ContractState, account_id: ContractAddress, token_type: u126) -> u128 {
+            let account_token_balance = self.account_balance.read(balance);
+            account_token_balance
+        }
+        fn get_pool_token_balance(self: ContractState, token_type: u126) -> u128 {
+           let pool_token_balance = self.pool_balance.read(balance);
+           pool_token_balance
+        }
         fn swap(ref self: ContractState, token_from: u128, amount_from: u128) {
+            let account_id = get_caller_address();
 
-
+            // add swap function logic here
         }
     }
 
@@ -33,49 +46,23 @@ mod AMM {
 
     #[generate_trait]
     impl InternalAMM of InternalAMMTrait {
-        fn modify_account_balance(ref self: ContractState, 
+        fn modify_account_balance(ref self: 
+        ContractState, 
         account_id: u128,
         token_type: u128,
-        amount: felt52
+        amount: u128
     ) {
-        let current_balance = account_balance.read(); // finish contract balance change function
+        let mut current_balance = self.account_balance.read();
+        let new_balance = current_balance + amount;
+        let MAX_BALANCE = 1000000000;
+        assert!(self.new_balance.read() <= MAX_BALANCE, "New balance exceeds maximum allowed balance");
+        self.account_balance.write(account_id, token_type, new_balance);
 
-        
+      }
     }
-        
-        
-        
-        dress: ContractAddress, caller_address: ContractAddress)
-            self.balances.read(ContractAddress)
-        }
-        fn update_balance(ref self: ContractAddress, mut delta: u128) -> bool {
-            let current_balance = self.get_balance(ContractAddress);
-            let new_balance: u128 =  current_balance + delta;
-            assert(!new_balance >= 0, "Balance cannot be negative");
-            self.set_balance(ContractAddress, new_balance_u128);
-            true
 
-        fn set_balance(ref self: ContractAddress,  new_balance: u128) {
-            self.balance.write(ContractAddress, new_balance);
-        }
-        }
-
-
-
-
-        fn modify_account_balance( 
-            ref self: ContractState,
-            account_balance: felt252   
-        ) {
-            // calculate the new balance
-            self.account_balance.write()
-
-
-
-        }
-
-        
-    }
+    
+ }
 
 
 
